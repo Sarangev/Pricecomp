@@ -16,45 +16,33 @@ def flipkart(name):
     try:
         global flipkart
         name1 = name.replace(" ","+")
-        flipkart=f'https://www.flipkart.com/search?q={name1}&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=off&as=off'
+        flipkart=f'https://www.flipkart.com/search?q={name1}'
         flipkart_link = flipkart
-        res = requests.get(f'https://www.flipkart.com/search?q={name1}&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=off&as=off',headers=headers)
+        res = requests.get(flipkart_link)
 
 
         print("\nSearching in flipkart....")
         soup = BeautifulSoup(res.text,'html.parser')
-        
-        if(soup.select('._4rR01T')):
-            flipkart_name = soup.select('._4rR01T')[0].getText().strip().upper()
-            if name.upper() in flipkart_name:
-                flipkart_price = soup.select('._30jeq3')[0].getText().strip()
-                flipkart_name = soup.select('._4rR01T')[0].getText().strip()
-                flipkart_image = soup.select('._396cs4._3exPp9')[0]
-                print(flipkart_image['src'])
-                flipkart_image = flipkart_image['src']
-                print("Flipkart:")
-                print(flipkart_name)
-                print(flipkart_price)
-                print("---------------------------------")
-                
-        elif(soup.select('.s1Q9rs')):
-            flipkart_name = soup.select('.s1Q9rs')[0].getText().strip()
-            flipkart_name = flipkart_name.upper()
-            if name.upper() in flipkart_name:
-                flipkart_price = soup.select('._30jeq3')[0].getText().strip()
-                flipkart_image = soup.select('._396cs4._3exPp9')[0]
-                flipkart_image = flipkart_image['src']
-                print(flipkart_image)
-                flipkart_name = soup.select('.s1Q9rs')[0].getText().strip()
-                print("Flipkart:")
-                print(flipkart_name)
-                print(flipkart_price)
-                print("---------------------------------")
-        else:
-            flipkart_price='0'
-            
+        element = soup.select('[data-id]')[0]
+        flipkart_image_element = element.select('img')[0]
+        flipkart_image = flipkart_image_element["src"]
+        print(flipkart_image)
+        elements = element.select('a')
+        valued_list = []
+        for each in elements:
+            if(each.text!='' or each.text):
+                valued_list.append(each.text)
+        print(valued_list)
+        flipkart_name = valued_list[0]
+        print(flipkart_name)
+        prices = elements[2].select('div')
+        flipkart_price = prices[1].text
+        print(flipkart_price)
+
         return flipkart_price, flipkart_name[0:50], flipkart_image, flipkart_link
-    except:
+    # except Exception as e:
+    #     print(e)
+    except :
         print("Flipkart: No product found!")  
         print("---------------------------------")
         flipkart_price= '0'
@@ -165,7 +153,7 @@ def croma(name):
         global croma
         name1 = name.replace(" ","-")
         name2 = name.replace(" ","+")
-        croma= f"https://www.croma.com/search/?q={name2}:relevance:ZAStatusFlag:true:excludeOOSFlag&text={name2}"
+        croma= f"https://www.croma.com/search/?q={name2}"
         source = croma
         croma_link = croma
         wait_imp = 10
@@ -175,30 +163,38 @@ def croma(name):
         CO.add_argument('--start-maximized')
         print("Driver path", str(settings.BASE_DIR)+'\chromedriver.exe')
         wd = webdriver.Chrome(r''+str(settings.BASE_DIR)+'\chromedriver.exe', options=CO)
+        print("Driver Ok")
 
 
         wd.get(source)
+        print("GET Ok")
         wd.implicitly_wait(wait_imp)
-        
+        print("Wait Ok")
         try:
             elementname = WebDriverWait(wd, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "h3.product-title.plp-prod-title"))
             )
+            print("Element Name OK")
+            print(elementname)
+            print(elementname)
             elementprice = WebDriverWait(wd, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "span.amount"))
             )
+            print(elementprice)
             imgelement = WebDriverWait(wd, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-img.plp-card-thumbnail img"))
             )
-        except:
-            wd.quit()
-            
+            print(imgelement)
 
+        except Exception as e:
+            print(e)
+            wd.quit()
         croma_name = elementname.text
         croma_price = elementprice.text
         croma_image = imgelement.get_attribute("src")
         return croma_price, croma_name[0:50], croma_image, croma_link
-    except:
+    except Exception as e:
+        print(e)
         print("Croma: No product found!")
         print("---------------------------------")
         croma_price = '0'
